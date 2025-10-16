@@ -54,14 +54,46 @@ public class Sale : BaseEntity
     }
 
     /// <summary>
-    /// Marks the sale as cancelled, respecting the state invariant.
+    /// Executes the total cancellation of the sale, setting the IsCancelled flag to true 
+    /// and cascading the cancellation to all associated items.
     /// </summary>
+    /// <exception cref="DomainException">Thrown if the sale is already cancelled.</exception>
     public void Cancel()
     {
         if (IsCancelled)
-            throw new DomainException("The sale is already cancelled.");
+            throw new DomainException($"The sale {Number} is already cancelled.");
+
+        foreach (var item in _items)
+        {
+            item.Cancel();
+        }
 
         IsCancelled = true;
+    }
+
+    public void CancelItem(Guid itemId)
+    {
+        if (IsCancelled)
+            throw new DomainException($"Cannot cancel items; Sale {Number} is already fully cancelled.");
+
+        var itemToCancel = this.Items.FirstOrDefault(i => i.Id == itemId)
+            ?? throw new DomainException($"Item with ID {itemId} not found in this sale.");
+
+        itemToCancel.Cancel();
+
+        TryCancelIfAllItemsCancelled();
+    }
+
+    /// <summary>
+    /// Attempts to cancel the parent Sale if all line items in the collection are marked as cancelled.
+    /// This method enforces the cascading business rule for partial cancellation.
+    /// </summary>
+    private void TryCancelIfAllItemsCancelled()
+    {
+        if (this.IsCancelled) return;
+
+        if (this.Items.All(i => i.IsCancelled))
+            this.IsCancelled = true;
     }
 
     /// <summary>

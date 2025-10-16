@@ -68,4 +68,16 @@ public class SaleItem : BaseEntity
 
         return 0M;
     }
+
+    /// <summary>
+    /// Executes the cancellation of this specific sale item, enforcing the item-level invariant.
+    /// </summary>
+    /// <exception cref="DomainException">Thrown if the item is already cancelled.</exception>
+    public void Cancel()
+    {
+        if (this.IsCancelled)
+            throw new DomainException($"The item {this.Product.Description} is already cancelled.");
+
+        this.IsCancelled = true;
+    }
 }
