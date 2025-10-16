@@ -39,6 +39,16 @@ public class SaleRepository : ISaleRepository
     }
 
     /// <summary>
+    /// Updates an existing Sale aggregate in the database.
+    /// </summary>
+    /// <param name="sale">The Sale aggregate root.</param>
+    public async Task UpdateAsync(Sale sale)
+    {
+        _context.Sales.Update(sale);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
     /// Delete Sale aggregate from the persistence context asynchronously.
     /// </summary>
     /// <param name="id">The Sale aggregate identifier to delete.</param>

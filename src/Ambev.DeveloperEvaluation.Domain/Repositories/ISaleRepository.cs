@@ -22,6 +22,12 @@ public interface ISaleRepository
     Task CreateAsync(Sale sale, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Updates an existing Sale aggregate, persisting all changes tracked by the context.
+    /// </summary>
+    /// <param name="sale">The Sale aggregate root with modified state.</param>
+    Task UpdateAsync(Sale sale);
+
+    /// <summary>
     /// Delete Sale aggregate from the persistence context asynchronously.
     /// </summary>
     /// <param name="id">The Sale aggregate identifier to delete.</param>
