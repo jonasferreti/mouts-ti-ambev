@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
+using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using AutoMapper;
@@ -30,8 +31,9 @@ public class SalesController : BaseController
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The created sale details</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponseWithData<CreateSaleResponse>), (int)HttpStatusCode.Created)]
-    [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(ApiResponseWithData<CreateSaleResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Post([FromBody] CreateSaleRequest request, CancellationToken cancellationToken)
     {
         var validator = new CreateSaleRequestValidator();
@@ -50,5 +52,47 @@ public class SalesController : BaseController
             Message = "Sale created successfully",
             Data = _mapper.Map<CreateSaleResponse>(response)
         });
+    }
+
+    /// <summary>
+    /// Cancels a specific Sale and all of its associated items, enforcing cascading domain rules.
+    /// </summary>
+    /// <param name="id">The GUID of the Sale to be cancelled.</param>
+    /// <returns>Success response if the sale was cancelled</returns>
+<<<<<<< Updated upstream
+    [HttpPost("{id:guid}/cancel")] // <-- Alterado para PATCH
+=======
+    [HttpPatch("{Id}/cancel")]
+>>>>>>> Stashed changes
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CancelSale(Guid id)
+    {
+        var command = new CancelSaleCommand(id);
+        await _mediator.Send(command);
+
+        return Ok("Sale cancelled successfully");
+    }
+
+    /// <summary>
+    /// Cancels a specific Sale Item within a Sale. Triggers Sale cancellation if all items are cancelled.
+    /// </summary>
+    /// <param name="saleId">The GUID of the parent Sale.</param>
+    /// <param name="itemId">The GUID of the item to be cancelled.</param>
+    /// <returns>Success response if the sale item was cancelled</returns>
+<<<<<<< Updated upstream
+    [HttpPost("{saleId:guid}/items/{itemId:guid}/cancellation")]
+=======
+    [HttpPatch("{SaleId}/items/{ItemId}/cancel")]
+>>>>>>> Stashed changes
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CancelSaleItem(Guid saleId, Guid itemId)
+    {
+        var command = new CancelSaleItemCommand(saleId, itemId);
+        await _mediator.Send(command);
+
+        return Ok("Sale item cancelled successfully");
     }
 }
