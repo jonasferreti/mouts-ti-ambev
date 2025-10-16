@@ -1,6 +1,9 @@
-﻿using Ambev.DeveloperEvaluation.Common.Validation;
+﻿using Ambev.DeveloperEvaluation.Application.Exceptions;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using FluentValidation;
+using System;
+using System.Net;
 using System.Text.Json;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Middleware
@@ -28,6 +31,10 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             {
                 await HandleDomainExceptionAsync(context, ex);
             }
+            catch (NotFoundException ex)
+            {
+                await HandleNotFoundExceptionAsync(context, ex);
+            }
         }
 
         private static Task HandleValidationExceptionAsync(HttpContext context, ValidationException exception)
@@ -53,13 +60,24 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
 
         private static Task HandleDomainExceptionAsync(HttpContext context, Exception exception)
         {
+            return HandleExceptionAsync(context, exception.Message, HttpStatusCode.BadRequest);
+        }
+
+        private static Task HandleNotFoundExceptionAsync(HttpContext context, Exception exception)
+        {
+            return HandleExceptionAsync(context, exception.Message, HttpStatusCode.NotFound);
+        }
+
+        private static Task HandleExceptionAsync(HttpContext context, string message,
+            HttpStatusCode statusCode)
+        {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            context.Response.StatusCode = (int)statusCode;
 
             var response = new ApiResponse
             {
                 Success = false,
-                Message = exception.Message
+                Message = message
             };
 
             var jsonOptions = new JsonSerializerOptions
