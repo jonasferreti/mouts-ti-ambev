@@ -1,10 +1,10 @@
 ﻿namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
+using Ambev.DeveloperEvaluation.Application.Exceptions;
+using Ambev.DeveloperEvaluation.Domain.Repositories;
+using FluentValidation;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.Application.Exceptions;
 
 
 /// <summary>
@@ -21,6 +21,12 @@ public class CancelSaleHandler : IRequestHandler<CancelSaleCommand>
 
     public async Task Handle(CancelSaleCommand command, CancellationToken cancellationToken)
     {
+        var validator = new CancelSaleValidator();
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var sale = await _saleRepository.GetByIdAsync(command.Id, cancellationToken)
             ?? throw new NotFoundException($"Sale with ID {command.Id} not found.");
 
