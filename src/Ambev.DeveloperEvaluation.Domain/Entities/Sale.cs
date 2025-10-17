@@ -85,6 +85,30 @@ public class Sale : BaseEntity
     }
 
     /// <summary>
+    /// Removes a specific item from the Sale collection.
+    /// The application layer must check the item count afterwards for cascading deletion.
+    /// </summary>
+    /// <param name="itemId">The unique identifier of the SaleItem to remove.</param>
+    /// <exception cref="NotFoundException">Thrown if the Item is not found.</exception>
+    public void RemoveItem(Guid itemId)
+    {
+        var itemToRemove = this.Items.FirstOrDefault(i => i.Id == itemId)
+           ?? throw new DomainException($"Item with ID {itemId} not found in this sale.");
+
+        _items.Remove(itemToRemove);
+    }
+
+    /// <summary>
+    /// Checks if the Sale Aggregate Root still contains any items.
+    /// </summary>
+    /// <returns>True if the item collection is not empty; otherwise, false.</returns>
+    public bool HasItems()
+    {
+        return _items.Count != 0;
+    }
+
+
+    /// <summary>
     /// Attempts to cancel the parent Sale if all line items in the collection are marked as cancelled.
     /// This method enforces the cascading business rule for partial cancellation.
     /// </summary>
