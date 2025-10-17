@@ -39,20 +39,20 @@ public class SaleItem : BaseEntity
         UnitPrice = unitPrice;
         IsCancelled = false;
 
-        TotalAmount = CalculateTotal();
+        CalculateTotal();
     }
 
     /// <summary>
     /// Applies the business discount rules based on quantity and calculates the item's total amount.
     /// </summary>
-    private Money CalculateTotal()
+    public void CalculateTotal()
     {
         DiscountPercentage = CalculateDiscountPercentage();
 
         var total = Quantity.Value * UnitPrice.Value;
         var discount = total * DiscountPercentage;
 
-        return new Money(total - discount);
+        TotalAmount = new Money(total - discount);
     }
 
     /// <summary>

@@ -96,6 +96,9 @@ public class Sale : BaseEntity
            ?? throw new DomainException($"Item with ID {itemId} not found in this sale.");
 
         _items.Remove(itemToRemove);
+
+        if (_items.Count > 0)
+            CalculateTotalAmount();
     }
 
     /// <summary>
@@ -105,6 +108,41 @@ public class Sale : BaseEntity
     public bool HasItems()
     {
         return _items.Count != 0;
+    }
+
+    /// <summary>
+    /// Fully replaces the mutable state of the Sale Aggregate and its associated SaleItems.
+    /// This method only accepts Domain entities and Value Objects, ensuring architectural purity.
+    /// It enforces transactional consistency by clearing the old items and adding new ones,
+    /// which guides the ORM (EF Core) to execute necessary DELETEs and INSERTs upon persistence.
+    /// </summary>
+    /// <param name="customer">The new ExternalReference Value Object for the Customer.</param>
+    /// <param name="branch">The new ExternalReference Value Object for the Branch.</param>
+    /// <param name="items">The COMPLETE collection of new SaleItem entities that will replace the existing ones.</param>
+    /// <exception cref="DomainException">Thrown if an update is attempted on a cancelled sale or if a cancelled item is included in the update.</exception>
+    public void Update(
+        ExternalReference customer,
+        ExternalReference branch,
+        IReadOnlyCollection<SaleItem> items)
+    {
+        if (this.IsCancelled)
+            throw new DomainException($"Cannot update sale {this.Number}. The sale is already cancelled.");
+
+        Customer = customer;
+        Branch = branch;
+
+        _items.Clear();
+
+        foreach (var item in items)
+        {
+            if (item.IsCancelled)
+                throw new DomainException("Cannot add a cancelled item to a sale");
+
+            item.CalculateTotal();
+            _items.Add(item);
+        }
+
+        CalculateTotalAmount();
     }
 
 
