@@ -19,6 +19,9 @@ public class BaseController : ControllerBase
     protected IActionResult Ok<T>(T data) =>
             base.Ok(new ApiResponseWithData<T> { Data = data, Success = true });
 
+    protected IActionResult Ok<T>(string message, T data) =>
+            base.Ok(new ApiResponseWithData<T> { Data = data, Success = true, Message = message });
+
     protected IActionResult Ok(string message) =>
         base.Ok(new ApiResponse { Message = message, Success = true });
 
