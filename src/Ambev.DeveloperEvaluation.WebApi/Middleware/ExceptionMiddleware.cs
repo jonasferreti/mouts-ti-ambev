@@ -60,24 +60,27 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
 
         private static Task HandleDomainExceptionAsync(HttpContext context, Exception exception)
         {
-            return HandleExceptionAsync(context, exception.Message, HttpStatusCode.BadRequest);
+            return HandleExceptionAsync(context, "BussinessLogicError",
+                exception, HttpStatusCode.BadRequest);
         }
 
         private static Task HandleNotFoundExceptionAsync(HttpContext context, Exception exception)
         {
-            return HandleExceptionAsync(context, exception.Message, HttpStatusCode.NotFound);
+            return HandleExceptionAsync(context, "NotFoundError",
+                exception, HttpStatusCode.NotFound);
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, string message,
-            HttpStatusCode statusCode)
+        private static Task HandleExceptionAsync(HttpContext context, string message, 
+            Exception ex, HttpStatusCode statusCode)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;
 
-            var response = new ApiResponse
+            var response = new ApiResponse<string>
             {
                 Success = false,
-                Message = message
+                Message = message,
+                Errors = [ex.Message]
             };
 
             var jsonOptions = new JsonSerializerOptions
