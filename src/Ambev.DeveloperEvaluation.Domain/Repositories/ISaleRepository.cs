@@ -1,4 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Shared;
 
 namespace Ambev.DeveloperEvaluation.Domain.Repositories;
 
@@ -21,6 +22,17 @@ public interface ISaleRepository
     /// <param name="id">The  Sale aggregate identifier.</param>
     /// <returns>The Sale aggregate, or null if not found.</returns>
     Task<Sale?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paginated list of Sales.
+    /// </summary>
+    /// <param name="page">Page number.</param>
+    /// <param name="size">Items per page.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A tuple containing the list of Sales and the total count before pagination.</returns>
+    Task<(List<Sale> sales, int count)> GetPaginatedAsync(int page, int size,
+        SaleSearchCriteria criteria,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Create a new Sale aggregate to the persistence context asynchronously.
