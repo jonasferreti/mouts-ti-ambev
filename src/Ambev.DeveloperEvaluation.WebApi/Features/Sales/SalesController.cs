@@ -1,10 +1,12 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
+using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.DeleteSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -108,6 +110,36 @@ public class SalesController : BaseController
         await _mediator.Send(command, cancellationToken);
 
         return Ok("Sale item cancelled successfully");
+    }
+
+    /// <summary>
+    /// Updates an existing Sale Aggregate Root by completely replacing its mutable state.
+    /// This is a full operation, replacing Customer, Branch, and the entire Item collection.
+    /// </summary>
+    /// <param name="id">The unique identifier (GUID) of the Sale to be updated.</param>
+    /// <param name="command">The command containing the full replacement data for the Sale.</param>
+    /// <returns>The updated Sale response with data</returns>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(CreateSaleResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateSale([FromRoute] Guid id, UpdateSaleRequest request,
+        CancellationToken cancellationToken)
+    {
+        request.Id = id;
+
+        var validator = new UpdateSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var command = _mapper.Map<UpdateSaleCommand>(request);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        var response = _mapper.Map<UpdateSaleResponse>(result);
+
+        return Ok("Sale updated successfully", response);
     }
 
     /// <summary>
