@@ -1,5 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Shared;
+using Ambev.DeveloperEvaluation.ORM.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
@@ -39,6 +41,36 @@ public class SaleRepository : ISaleRepository
         return await _context.Sales
             .Include(s => s.Items)
             .SingleOrDefaultAsync(s => s.Id == id, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieves a paginated list of Sales.
+    /// </summary>
+    /// <param name="page">Page number.</param>
+    /// <param name="size">Items per page.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A tuple containing the list of Sales and the total count before pagination.</returns>
+    public async Task<(List<Sale> sales, int count)> GetPaginatedAsync(int page, int size,
+        SaleSearchCriteria criteria,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Sales
+            .Include(s => s.Items)
+            .AsQueryable();
+
+        query = query
+            .ApplyCustomerFilter(criteria.CustomerName)
+            .ApplyBranchFilter(criteria.BranchName)
+            .ApplyProductFilter(criteria.ProductName)
+            .ApplyOrderBy(criteria.SortField, criteria.SortDirection);
+
+        var count = await query.CountAsync(cancellationToken);
+        var sales = await query
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(cancellationToken);
+
+        return (sales, count);
     }
 
     /// <summary>
