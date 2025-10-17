@@ -55,24 +55,19 @@ public class SaleRepository : ISaleRepository
     /// Updates an existing Sale aggregate in the database.
     /// </summary>
     /// <param name="sale">The Sale aggregate root.</param>
-    public async Task UpdateAsync(Sale sale)
+    public async Task UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
     {
         _context.Sales.Update(sale);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <summary>
     /// Delete Sale aggregate from the persistence context asynchronously.
     /// </summary>
     /// <param name="id">The Sale aggregate identifier to delete.</param>
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Sale sale, CancellationToken cancellationToken = default)
     {
-        var sale = await GetByIdAsync(id, cancellationToken);
-        if (sale is null)
-            return false;
-
         _context.Sales.Remove(sale);
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
     }
 }

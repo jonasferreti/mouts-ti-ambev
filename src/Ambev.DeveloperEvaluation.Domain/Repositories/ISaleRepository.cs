@@ -32,11 +32,11 @@ public interface ISaleRepository
     /// Updates an existing Sale aggregate, persisting all changes tracked by the context.
     /// </summary>
     /// <param name="sale">The Sale aggregate root with modified state.</param>
-    Task UpdateAsync(Sale sale);
+    Task UpdateAsync(Sale sale, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Delete Sale aggregate from the persistence context asynchronously.
     /// </summary>
     /// <param name="id">The Sale aggregate identifier to delete.</param>
-    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Sale sale, CancellationToken cancellationToken = default);
 }
