@@ -1,13 +1,16 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.DeleteSale;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Threading;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -105,5 +108,53 @@ public class SalesController : BaseController
         await _mediator.Send(command, cancellationToken);
 
         return Ok("Sale item cancelled successfully");
+    }
+
+    /// <summary>
+    /// Permanently deletes a specific Sale Aggregate Root. All associated items are deleted via cascade.
+    /// </summary>
+    /// <param name="request">The sale item deletion request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>NoContent response upon successful deletion.</returns>
+    [HttpDelete("{Id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteSale([FromRoute] DeleteSaleRequest request,
+        CancellationToken cancellationToken)
+    {
+        var validator = new DeleteSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var command = _mapper.Map<DeleteSaleCommand>(request);
+        await _mediator.Send(command, cancellationToken);
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Permanently deletes a specific Sale Item. If the sale becomes empty, the entire Sale is deleted (cascading).
+    /// </summary>
+    /// <param name="request">The sale item deletion request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>NoContent response upon successful deletion.</returns>
+    [HttpDelete("{SaleId}/items/{ItemId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteSaleItem([FromRoute] DeleteSaleItemRequest request,
+        CancellationToken cancellationToken)
+    {
+        var validator = new DeleteSaleItemRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var command = _mapper.Map<DeleteSaleItemCommand>(request);
+        await _mediator.Send(command, cancellationToken);
+
+        return NoContent();
     }
 }
