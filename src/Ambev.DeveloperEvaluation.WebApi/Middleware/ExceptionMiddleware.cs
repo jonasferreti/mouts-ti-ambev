@@ -35,6 +35,10 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             {
                 await HandleNotFoundExceptionAsync(context, ex);
             }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(context, "InternalServerError", ex);
+            }
         }
 
         private static Task HandleValidationExceptionAsync(HttpContext context, ValidationException exception)
@@ -71,7 +75,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
         }
 
         private static Task HandleExceptionAsync(HttpContext context, string message, 
-            Exception ex, HttpStatusCode statusCode)
+            Exception ex, HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;
