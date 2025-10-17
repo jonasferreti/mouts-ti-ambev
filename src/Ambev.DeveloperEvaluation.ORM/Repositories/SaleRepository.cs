@@ -38,7 +38,7 @@ public class SaleRepository : ISaleRepository
     {
         return await _context.Sales
             .Include(s => s.Items)
-            .SingleOrDefaultAsync(s => s.Id == id);
+            .SingleOrDefaultAsync(s => s.Id == id, cancellationToken: cancellationToken);
     }
 
     /// <summary>
