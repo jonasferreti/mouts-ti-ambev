@@ -12,8 +12,15 @@ public interface ISaleRepository
     /// Retrieves a Sale aggregate by its id, including all its items.
     /// </summary>
     /// <param name="id">The  Sale aggregate identifier.</param>
-    /// <returns>The Sale aggregate, or null if not found.</returns>
+    /// <returns>The Sale aggregate (no tracking), or null if not found.</returns>
     Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a Sale aggregate by its id, including all its items for updating purposes
+    /// </summary>
+    /// <param name="id">The  Sale aggregate identifier.</param>
+    /// <returns>The Sale aggregate, or null if not found.</returns>
+    Task<Sale?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Create a new Sale aggregate to the persistence context asynchronously.
