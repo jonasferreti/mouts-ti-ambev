@@ -57,12 +57,16 @@ public class Program
                 );
             });
 
+            var salesEventsQueue = "sales_events_queue";
+
             builder.Services.AddRebus(configure => configure
-                .Transport(t => t.UseInMemoryTransport(new(), "sales_events_queue"))
-                .Routing(r => r.TypeBased().Map<SaleCreatedEvent>("sales_events_queue"))
+                .Transport(t => t.UseInMemoryTransport(new(), salesEventsQueue))
+                .Routing(r => r.TypeBased()
+                    .Map<SaleCreatedEvent>(salesEventsQueue)
+                    .Map<SaleCancelledEvent>(salesEventsQueue))
             );
 
-            builder.Services.AutoRegisterHandlersFromAssemblyOf<SaleCreatedRebusConsumer>();
+            builder.Services.AutoRegisterHandlersFromAssemblyOf<ApplicationLayer>();
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
