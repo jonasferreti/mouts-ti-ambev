@@ -6,7 +6,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Events;
 /// </summary>
 /// <param name="SaleId">The unique identifier of the Sale.</param>
 /// <param name="ItemId">The unique identifier of the deleted Sale Item.</param>
-public record SaleItemDeletedEvent(Guid SaleId, Guid ItemId)
+public record SaleItemDeletedEvent(Guid SaleId, Guid ItemId) : IDomainEvent
 {
     public DateTime DateOccurred { get; } = DateTime.UtcNow;
 }

@@ -1,4 +1,6 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Events;
+﻿using Ambev.DeveloperEvaluation.Application.Consumers.Cache;
+using Ambev.DeveloperEvaluation.Common.Cache;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Microsoft.Extensions.Logging;
 using Rebus.Handlers;
 
@@ -8,11 +10,13 @@ namespace Ambev.DeveloperEvaluation.Application.Consumers;
 /// <summary>
 /// Rebus message handler responsible for consuming the SaleItemCancelledEvent
 /// </summary>
-public class SaleItemCancelledConsumer : IHandleMessages<SaleItemCancelledEvent>
+public class SaleItemCancelledConsumer : SaleCacheInvalidatorConsumerBase<SaleItemCancelledEvent>
 {
     private readonly ILogger<SaleItemCancelledConsumer> _logger;
 
-    public SaleItemCancelledConsumer(ILogger<SaleItemCancelledConsumer> logger)
+    public SaleItemCancelledConsumer(
+        ILogger<SaleItemCancelledConsumer> logger,
+        ICacheManager cacheManager) : base(cacheManager)
     {
         _logger = logger;
     }
@@ -22,7 +26,7 @@ public class SaleItemCancelledConsumer : IHandleMessages<SaleItemCancelledEvent>
     /// </summary>
     /// <param name="message">The SaleItemCancelledEvent record containing sale details.</param>
     /// <returns>A completed task, signaling Rebus that the message was processed successfully.</returns>
-    public Task Handle(SaleItemCancelledEvent message)
+    public override async Task Handle(SaleItemCancelledEvent message)
     {
         _logger.LogInformation(
             "EVENT: SaleItem {ItemId} for Sale {SaleId} was cancelled on {DateOccurred}",
@@ -31,6 +35,6 @@ public class SaleItemCancelledConsumer : IHandleMessages<SaleItemCancelledEvent>
             message.DateOccurred
         );
 
-        return Task.CompletedTask;
+        await base.Handle(message);
     }
 }
