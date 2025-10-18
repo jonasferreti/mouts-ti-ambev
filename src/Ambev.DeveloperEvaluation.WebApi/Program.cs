@@ -63,7 +63,8 @@ public class Program
                 .Transport(t => t.UseInMemoryTransport(new(), salesEventsQueue))
                 .Routing(r => r.TypeBased()
                     .Map<SaleCreatedEvent>(salesEventsQueue)
-                    .Map<SaleCancelledEvent>(salesEventsQueue))
+                    .Map<SaleCancelledEvent>(salesEventsQueue)
+                    .Map<SaleItemCancelledEvent>(salesEventsQueue))
             );
 
             builder.Services.AutoRegisterHandlersFromAssemblyOf<ApplicationLayer>();
