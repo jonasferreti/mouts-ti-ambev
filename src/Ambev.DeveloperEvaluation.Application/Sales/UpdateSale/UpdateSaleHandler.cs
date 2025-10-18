@@ -31,7 +31,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var sale = await _saleRepository.GetByIdAsync(command.Id, cancellationToken)
+        var sale = await _saleRepository.GetByIdForUpdateAsync(command.Id, cancellationToken)
              ?? throw new NotFoundException($"Sale with ID {command.Id} not found.");
 
         var customer = new ExternalReference(command.CustomerId, command.CustomerName);
