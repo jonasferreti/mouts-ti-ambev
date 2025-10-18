@@ -1,10 +1,12 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Exceptions;
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Extensions;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
+using Rebus.Bus;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 
@@ -16,11 +18,13 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
 {
     private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
+    private readonly IBus _bus;
 
-    public UpdateSaleHandler(ISaleRepository repository, IMapper mapper)
+    public UpdateSaleHandler(ISaleRepository repository, IMapper mapper, IBus bus)
     {
         _saleRepository = repository;
         _mapper = mapper;
+        _bus = bus;
     }
 
     public async Task<UpdateSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
@@ -44,6 +48,10 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         sale.Update(customer, branch, newItems);
 
         await _saleRepository.UpdateAsync(sale, cancellationToken);
+
+        var saleModifiedEvent = sale.SaleModifiedEvent();
+        await _bus.Send(saleModifiedEvent);
+
         return _mapper.Map<UpdateSaleResult>(sale);
     }
 }
