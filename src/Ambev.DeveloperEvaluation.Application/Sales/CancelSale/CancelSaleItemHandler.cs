@@ -1,6 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Exceptions;
 using Ambev.DeveloperEvaluation.Domain.Extensions;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using FluentValidation;
 using MediatR;
 using Rebus.Bus;
 
@@ -23,6 +24,12 @@ public class CancelSaleItemHandler : IRequestHandler<CancelSaleItemCommand>
 
     public async Task Handle(CancelSaleItemCommand command, CancellationToken cancellationToken)
     {
+        var validator = new CancelSaleItemValidator();
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var sale = await _saleRepository.GetByIdForUpdateAsync(command.SaleId, cancellationToken)
             ?? throw new NotFoundException($"Sale with ID {command.SaleId} not found.");
 
