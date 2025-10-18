@@ -7,11 +7,11 @@ namespace Ambev.DeveloperEvaluation.Application.Consumers;
 /// <summary>
 /// Rebus message handler responsible for consuming the SaleCreatedEvent
 /// </summary>
-public class SaleCreatedRebusConsumer : IHandleMessages<SaleCreatedEvent>
+public class SaleCreatedConsumer : IHandleMessages<SaleCreatedEvent>
 {
-    private readonly ILogger<SaleCreatedRebusConsumer> _logger;
+    private readonly ILogger<SaleCreatedConsumer> _logger;
 
-    public SaleCreatedRebusConsumer(ILogger<SaleCreatedRebusConsumer> logger)
+    public SaleCreatedConsumer(ILogger<SaleCreatedConsumer> logger)
     {
         _logger = logger;
     }
