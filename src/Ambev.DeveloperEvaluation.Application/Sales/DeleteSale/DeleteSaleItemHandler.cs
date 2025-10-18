@@ -1,5 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Exceptions;
+using Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using FluentValidation;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
