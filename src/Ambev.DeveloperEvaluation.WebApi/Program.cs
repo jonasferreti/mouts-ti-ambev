@@ -1,5 +1,4 @@
 ﻿using Ambev.DeveloperEvaluation.Application;
-using Ambev.DeveloperEvaluation.Application.Consumers;
 using Ambev.DeveloperEvaluation.Common.HealthChecks;
 using Ambev.DeveloperEvaluation.Common.Logging;
 using Ambev.DeveloperEvaluation.Common.Security;
@@ -10,9 +9,7 @@ using Ambev.DeveloperEvaluation.ORM;
 using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Rebus.Activation;
 using Rebus.Config;
-using Rebus.Persistence.InMem;
 using Rebus.Routing.TypeBased;
 using Rebus.Transport.InMem;
 using Serilog;
@@ -65,7 +62,9 @@ public class Program
                     .Map<SaleCreatedEvent>(salesEventsQueue)
                     .Map<SaleCancelledEvent>(salesEventsQueue)
                     .Map<SaleItemCancelledEvent>(salesEventsQueue)
-                    .Map<SaleModifiedEvent>(salesEventsQueue))
+                    .Map<SaleModifiedEvent>(salesEventsQueue)
+                    .Map<SaleDeletedEvent>(salesEventsQueue)
+                    .Map<SaleItemDeletedEvent>(salesEventsQueue))
             );
 
             builder.Services.AutoRegisterHandlersFromAssemblyOf<ApplicationLayer>();
