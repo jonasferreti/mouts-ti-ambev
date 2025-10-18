@@ -1,8 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Exceptions;
-using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using MediatR;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 
@@ -22,7 +20,7 @@ public class CancelSaleItemHandler : IRequestHandler<CancelSaleItemCommand>
     public async Task Handle(CancelSaleItemCommand command, CancellationToken cancellationToken)
     {
         // 1. Load the Aggregate Root using the SaleId
-        var sale = await _saleRepository.GetByIdAsync(command.SaleId, cancellationToken)
+        var sale = await _saleRepository.GetByIdForUpdateAsync(command.SaleId, cancellationToken)
             ?? throw new NotFoundException($"Sale with ID {command.SaleId} not found.");
 
         var item = sale.Items.FirstOrDefault(i => i.Id == command.ItemId)
