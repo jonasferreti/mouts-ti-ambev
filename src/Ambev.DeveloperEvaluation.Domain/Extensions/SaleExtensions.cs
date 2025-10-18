@@ -24,4 +24,14 @@ public static class SaleExtensions
     {
         return new SaleItemCancelledEvent(sale.Id, itemId);
     }
+
+    public static SaleModifiedEvent SaleModifiedEvent(this Sale sale)
+    {
+        return new SaleModifiedEvent(
+            sale.Id,
+            sale.Customer.Value,
+            sale.Branch.Value,
+            sale.TotalAmount.Value
+        );
+    }
 }
