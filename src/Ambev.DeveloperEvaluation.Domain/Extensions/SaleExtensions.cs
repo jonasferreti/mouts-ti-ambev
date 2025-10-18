@@ -34,4 +34,14 @@ public static class SaleExtensions
             sale.TotalAmount.Value
         );
     }
+
+    public static SaleDeletedEvent SaleDeletedEvent(this Sale sale)
+    {
+        return new SaleDeletedEvent(sale.Id);
+    }
+
+    public static SaleItemDeletedEvent SaleItemDeletedEvent(this Sale sale, Guid itemId)
+    {
+        return new SaleItemDeletedEvent(sale.Id, itemId);
+    }
 }

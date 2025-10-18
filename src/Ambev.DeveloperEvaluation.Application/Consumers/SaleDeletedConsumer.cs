@@ -1,17 +1,21 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Events;
+﻿using Ambev.DeveloperEvaluation.Application.Consumers.Cache;
+using Ambev.DeveloperEvaluation.Common.Cache;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Microsoft.Extensions.Logging;
-using Rebus.Handlers;
 
 namespace Ambev.DeveloperEvaluation.Application.Consumers;
 
 /// <summary>
 /// Rebus message handler responsible for consuming the SaleDeletedEvent
 /// </summary>
-public class SaleDeletedConsumer : IHandleMessages<SaleDeletedEvent>
+public class SaleDeletedConsumer : SaleCacheInvalidatorConsumerBase<SaleDeletedEvent>
 {
+
     private readonly ILogger<SaleDeletedConsumer> _logger;
 
-    public SaleDeletedConsumer(ILogger<SaleDeletedConsumer> logger)
+    public SaleDeletedConsumer(
+        ILogger<SaleDeletedConsumer> logger,
+        ICacheManager cacheManager) : base(cacheManager)
     {
         _logger = logger;
     }
@@ -21,7 +25,7 @@ public class SaleDeletedConsumer : IHandleMessages<SaleDeletedEvent>
     /// </summary>
     /// <param name="message">The SaleDeletedEvent record containing sale details.</param>
     /// <returns>A completed task, signaling Rebus that the message was processed successfully.</returns>
-    public Task Handle(SaleDeletedEvent message)
+    public override async Task Handle(SaleDeletedEvent message)
     {
         _logger.LogInformation(
             "EVENT: Sale {SaleId} was deleted on {DateOccurred}",
@@ -29,7 +33,7 @@ public class SaleDeletedConsumer : IHandleMessages<SaleDeletedEvent>
             message.DateOccurred
         );
 
-        return Task.CompletedTask;
+        await base.Handle(message);
     }
 }
 

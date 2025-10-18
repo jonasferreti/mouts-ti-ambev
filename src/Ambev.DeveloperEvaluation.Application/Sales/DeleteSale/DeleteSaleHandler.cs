@@ -1,7 +1,9 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Exceptions;
+using Ambev.DeveloperEvaluation.Domain.Extensions;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using FluentValidation;
 using MediatR;
+using Rebus.Bus;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 
@@ -11,10 +13,12 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand>
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IBus _bus;
 
-    public DeleteSaleHandler(ISaleRepository saleRepository)
+    public DeleteSaleHandler(ISaleRepository saleRepository, IBus bus)
     {
         _saleRepository = saleRepository;
+        this._bus = bus;
     }
 
     public async Task Handle(DeleteSaleCommand command, CancellationToken cancellationToken)
@@ -29,5 +33,14 @@ public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand>
             ?? throw new NotFoundException($"Sale with ID {command.Id} not found.");
 
         await _saleRepository.DeleteAsync(sale, cancellationToken);
+
+        var saleDeletedEvent = sale.SaleDeletedEvent();
+        await _bus.Send(saleDeletedEvent);
+
+        foreach(var item in sale.Items)
+        {
+            var saleItemDeletedEvent = sale.SaleItemDeletedEvent(item.Id);
+            await _bus.Send(saleItemDeletedEvent);
+        }
     }
 }

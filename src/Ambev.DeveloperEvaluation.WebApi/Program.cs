@@ -1,4 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Application;
+using Ambev.DeveloperEvaluation.Common.Cache;
 using Ambev.DeveloperEvaluation.Common.HealthChecks;
 using Ambev.DeveloperEvaluation.Common.Logging;
 using Ambev.DeveloperEvaluation.Common.Security;
@@ -68,6 +69,8 @@ public class Program
             );
 
             builder.Services.AutoRegisterHandlersFromAssemblyOf<ApplicationLayer>();
+
+            builder.Services.AddRedisCachingServices(builder.Configuration);
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
