@@ -11,17 +11,17 @@ public class PaginatedList<T>
     public int TotalCount { get; private set; }
 
 
-    public PaginatedList(List<T> items, int count, int pageNumber, int pageSize)
+    public PaginatedList(List<T> data, int totalCount, int currentPage, int pageSize)
     {
-        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        currentPage = currentPage < 1 ? 1 : currentPage;
         pageSize = pageSize < 1 ? 1 : pageSize;
 
-        TotalCount = count;
+        TotalCount = totalCount;
         PageSize = pageSize;
-        CurrentPage = pageNumber;
-        TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+        CurrentPage = currentPage;
+        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-        Data = items;
+        Data = data;
     }
 
     public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
