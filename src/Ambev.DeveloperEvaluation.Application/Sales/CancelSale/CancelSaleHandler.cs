@@ -27,7 +27,7 @@ public class CancelSaleHandler : IRequestHandler<CancelSaleCommand>
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var sale = await _saleRepository.GetByIdAsync(command.Id, cancellationToken)
+        var sale = await _saleRepository.GetByIdForUpdateAsync(command.Id, cancellationToken)
             ?? throw new NotFoundException($"Sale with ID {command.Id} not found.");
 
         sale.Cancel();
