@@ -64,7 +64,8 @@ public class Program
                 .Routing(r => r.TypeBased()
                     .Map<SaleCreatedEvent>(salesEventsQueue)
                     .Map<SaleCancelledEvent>(salesEventsQueue)
-                    .Map<SaleItemCancelledEvent>(salesEventsQueue))
+                    .Map<SaleItemCancelledEvent>(salesEventsQueue)
+                    .Map<SaleModifiedEvent>(salesEventsQueue))
             );
 
             builder.Services.AutoRegisterHandlersFromAssemblyOf<ApplicationLayer>();
