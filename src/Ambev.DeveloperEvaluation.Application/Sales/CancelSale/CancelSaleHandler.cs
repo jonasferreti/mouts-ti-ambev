@@ -1,6 +1,6 @@
 ﻿namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.Application.Exceptions;
-using Ambev.DeveloperEvaluation.Domain.Events;
+using Ambev.DeveloperEvaluation.Domain.Extensions;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using FluentValidation;
 using MediatR;
@@ -36,15 +36,15 @@ public class CancelSaleHandler : IRequestHandler<CancelSaleCommand>
 
         sale.Cancel();
 
-        await _saleRepository.UpdateAsync(sale);
+        await _saleRepository.UpdateAsync(sale, cancellationToken);
 
-        await EmitSaleCancelledEvent(sale.Id);
-    }
-
-    private async Task EmitSaleCancelledEvent(Guid saleId)
-    {
-        var saleCancelledEvent = new SaleCancelledEvent(saleId);
-
+        var saleCancelledEvent = sale.SaleCancelledEvent();
         await _bus.Send(saleCancelledEvent);
+
+        foreach(var item in sale.Items)
+        {
+            var saleCancelledItemEvent = sale.SaleItemCancelledEvent(item.Id);
+            await _bus.Send(saleCancelledItemEvent);
+        }
     }
 }

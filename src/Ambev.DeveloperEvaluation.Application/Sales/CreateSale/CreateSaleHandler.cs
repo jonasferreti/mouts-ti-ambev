@@ -1,5 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Events;
+using Ambev.DeveloperEvaluation.Domain.Extensions;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using FluentValidation;
@@ -43,21 +43,9 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
 
         await _saleRepository.CreateAsync(sale, cancellationToken);
 
-        await EmitSaleCreateEvent(sale);
-
-        return _mapper.Map<CreateSaleResult>(sale);
-    }
-
-    private async Task EmitSaleCreateEvent(Sale sale)
-    {
-        var saleCreatedEvent = new SaleCreatedEvent(
-            sale.Id, 
-            sale.Customer.Value,
-            sale.Branch.Value, 
-            sale.TotalAmount.Value
-        );
-
+        var saleCreatedEvent = sale.SaleCreatedEvent();
         await _bus.Send(saleCreatedEvent);
 
+        return _mapper.Map<CreateSaleResult>(sale);
     }
 }
