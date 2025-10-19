@@ -1,86 +1,216 @@
-# Developer Evaluation Project
+# Developer Evaluation Project - Mouts Ti (Ambev)
 
-`READ CAREFULLY`
+This repository contains the solution for the developer evaluation technical test, focusing on **Domain-Driven Design (DDD)** principles, Unit Testing, and demonstrating knowledge of modern C# practices, **CQRS**, and **.NET 8**.
 
-## Instructions
-**The test below will have up to 7 calendar days to be delivered from the date of receipt of this manual.**
+---
 
-- The code must be versioned in a public Github repository and a link must be sent for evaluation once completed
-- Upload this template to your repository and start working from it
-- Read the instructions carefully and make sure all requirements are being addressed
-- The repository must provide instructions on how to configure, execute and test the project
-- Documentation and overall organization will also be taken into consideration
+## 🚀 Overview
 
-## Use Case
-**You are a developer on the DeveloperStore team. Now we need to implement the API prototypes.**
+The core objective of this project was to implement the **Sales Domain** model, ensuring **transactional consistency** within the Aggregate Root and enforcing all business invariants. The solution expands into the **Application Layer** utilizing **CQRS** for separation of concerns and scalability.
 
-As we work with `DDD`, to reference entities from other domains, we use the `External Identities` pattern with denormalization of entity descriptions.
+> ⚠️ Note: The API does **not** implement authentication due to the scope of this bounded context. In a real-world scenario, there would be a dedicated authentication API that each microservice would consume.
 
-Therefore, you will write an API (complete CRUD) that handles sales records. The API needs to be able to inform:
+### Key Deliverables
 
-* Sale number
-* Date when the sale was made
-* Customer
-* Total sale amount
-* Branch where the sale was made
-* Products
-* Quantities
-* Unit prices
-* Discounts
-* Total amount for each item
-* Cancelled/Not Cancelled
+* **Domain Model:** Implementation of the `Sale` Aggregate Root and the `SaleItem` Entity.  
+* **CQRS Modeling:** Separation of concerns using **Commands** and **Queries**.  
+* **Data Processing:** Data handling and orchestration with **MediatR** and **AutoMapper**.  
+* **Redis Caching:** Implementation of **Redis** for caching in the sales queries.  
+* **Asynchronous Communication:** Domain events handled via **Rebus In-Memory**, with consumers logging via **Serilog** for:  
+  `SaleCreatedEvent`, `SaleCancelledEvent`, `SaleItemCancelledEvent`, `SaleModifiedEvent`, `SaleDeletedEvent`, `SaleItemDeletedEvent`.  
+* **Cache Management:** Cache invalidation managed via write/delete events.  
+* **Unit Tests:** Comprehensive test coverage with **xUnit**, **NSubstitute** and **Faker**.  
 
-It's not mandatory, but it would be a differential to build code for publishing events of:
-* SaleCreated
-* SaleModified
-* SaleCancelled
-* ItemCancelled
+---
 
-If you write the code, **it's not required** to actually publish to any Message Broker. You can log a message in the application log or however you find most convenient.
+## 🛠️ Technology Stack
 
-### Business Rules
+| Category | Tool / Framework | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | **.NET 8 (LTS)** | Primary runtime and core libraries |
+| **Architecture** | **MediatR** | CQRS pattern and message dispatching |
+| **Messaging** | **Rebus In-Memory** + **Serilog** | Event bus and logging |
+| **Caching** | **Redis** | Distributed caching layer |
+| **Containerization** | **Docker** & **docker-compose** | Packaging and orchestration |
+| **Testing** | **xUnit** | Unit testing framework |
+| **Mocking** | **NSubstitute** | Mocks and stubs |
+| **Test Data** | **Faker (Bogus)** | Realistic test data generation |
 
-* Purchases above 4 identical items have a 10% discount
-* Purchases between 10 and 20 identical items have a 20% discount
-* It's not possible to sell above 20 identical items
-* Purchases below 4 items cannot have a discount
+---
 
-These business rules define quantity-based discounting tiers and limitations:
+## 💾 Database Choice: PostgreSQL
 
-1. Discount Tiers:
-   - 4+ items: 10% discount
-   - 10-20 items: 20% discount
+Choosing **PostgreSQL** as the primary persistence layer is a strategic decision perfectly aligned with the transactional demands of the Sales Domain.
 
-2. Restrictions:
-   - Maximum limit: 20 items per product
-   - No discounts allowed for quantities below 4 items
+### Why PostgreSQL?
 
-## Overview
-This section provides a high-level overview of the project and the various skills and competencies it aims to assess for developer candidates. 
+- **Domain Modeling (1:N):**  
+  Its relational nature is ideal for modeling the Sales domain, which features a 1:N relationship between the Sale Aggregate Root and its SaleItems. It inherently guarantees the native referential integrity required by DDD.
 
-See [Overview](/.doc/overview.md)
+- **Transactional Consistency (ACID):**  
+  Robust support for ACID properties ensures all modifications to the Sale Aggregate Root are executed as a single, atomic transaction, maintaining domain invariants and overall data consistency.
 
-## Tech Stack
-This section lists the key technologies used in the project, including the backend, testing, frontend, and database components. 
+- **High EF Core Compatibility:**  
+  Offers high-performance, seamless integration with Entity Framework Core (EF Core) via the Npgsql provider, delivering a modern and reliable persistence layer within the .NET ecosystem.
 
-See [Tech Stack](/.doc/tech-stack.md)
+---
 
-## Frameworks
-This section outlines the frameworks and libraries that are leveraged in the project to enhance development productivity and maintainability. 
+## 📂 Project Structure
 
-See [Frameworks](/.doc/frameworks.md)
+```
+├── Solution 'Ambev.DeveloperEvaluation'
+│   ├── Adapters
+│   │   ├── Driven
+│   │   │   └── Infrastructure
+│   │   └── Drivers
+│   │       └── WebApi
+│   ├── Core
+│   │   ├── Application
+│   │   │   ├── Dependencies
+│   │   │   ├── Common
+│   │   │   ├── Consumers
+│   │   │   ├── Exceptions
+│   │   │   ├── Sales # Commands, Queries, Handlers
+│   │   │   └── Users
+│   │   └── Domain
+│   │       ├── Common
+│   │       ├── Entities # Sale (Aggregate Root), SaleItem 
+│   │       ├── Repositories # Interfaces
+│   │       └── ValueObjects # Money, Quantity, ExternalReference
+│   ├── Crosscutting
+│   │   ├── Ambev.DeveloperEvaluation.Common
+│   │   │   ├── Cache
+│   │   └── Ambev.DeveloperEvaluation.IoC
+│   └── Tests
+```
 
-<!-- 
-## API Structure
-This section includes links to the detailed documentation for the different API resources:
-- [API General](./docs/general-api.md)
-- [Products API](/.doc/products-api.md)
-- [Carts API](/.doc/carts-api.md)
-- [Users API](/.doc/users-api.md)
-- [Auth API](/.doc/auth-api.md)
--->
+---
 
-## Project Structure
-This section describes the overall structure and organization of the project files and directories. 
+## ✅ Unit Test Coverage Summary
 
-See [Project Structure](/.doc/project-structure.md)
+### Domain Layer
+
+#### Sale Aggregate Root (`Sale`)
+
+- **Item Management:** Methods `AddItem`, `RemoveItem`, and `Update` correctly recalculate the `TotalAmount`.
+- **Cancellation Rules:** Supports cascading cancellation; throws `DomainException` for invalid operations.
+
+#### SaleItem Entity (`SaleItem`)
+
+- **Discount Logic:** Supports 0%, 10%, and 20% discounts validated by quantity-based rules.
+
+#### Value Objects (`Money`, `Quantity`, `ExternalReference`)
+
+- **Invariants:** Enforce positive values, maximum quantity limits, and null-safety validations.
+
+---
+
+### Application Layer
+
+#### Handlers, Commands & Queries
+
+- **Orchestration & Validation:** Unit tests cover application layer handlers, commands, and queries to ensure business logic is correctly orchestrated and validated.
+- **Event Dispatching:** Tests verify that domain/application events are published as expected (e.g., `SaleCreatedEvent`, `SaleCancelledEvent`).
+
+
+---
+
+## ⚙️ Local Configuration, Secrets, and HTTPS
+
+Before running the application with `docker-compose`, configure the HTTPS certificate, secrets, and apply the EF migrations.
+
+### 1. Configure HTTPS Certificate
+
+Since the `docker-compose` mounts the local HTTPS certificate volume `~/.aspnet/https`, you must create the certificate and trust it locally:
+
+```bash
+dotnet dev-certs https -ep %USERPROFILE%\.aspnet\https\aspnetapp.pfx -p ev@luAt10n
+dotnet dev-certs https --trust
+```
+
+---
+
+### 2. Configure .NET User-Secrets
+
+The application uses **.NET User-Secrets** for storing sensitive data like connection strings.
+
+Initialize secrets (if not already):
+
+```bash
+dotnet user-secrets init
+```
+
+Set required secrets:
+
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=ambev.developerevaluation.database;Database=developer_evaluation;User Id=developer;Password=ev@luAt10n;TrustServerCertificate=True"
+dotnet user-secrets set "ConnectionStrings:RedisConnection" "ambev.developerevaluation.cache:6379,password=ev@luAt10n,abortConnect=False"
+```
+
+Verify:
+
+```bash
+dotnet user-secrets list
+```
+
+Ensure the volume mount is present in `docker-compose.yml`:
+
+```
+- ~/.aspnet/https:/https:ro
+```
+
+---
+
+### 3. Apply Database Migrations
+
+After configuring secrets, navigate to the **ORM** project and apply migrations using a **relative path**:
+
+```bash
+cd src/Ambev.DeveloperEvaluation.ORM
+dotnet ef database update --startup-project ../Ambev.DeveloperEvaluation.WebApi/Ambev.DeveloperEvaluation.WebApi.csproj
+```
+
+---
+
+### 4. Run the Application with Docker
+
+Build and start all services:
+
+```bash
+docker compose up --build -d
+```
+
+The application will be available at:
+
+👉 **https://localhost:8081/swagger/index.html**
+
+---
+
+### 5. Run Unit Tests
+
+Run all tests using the solution file:
+
+```bash
+dotnet test Ambev.DeveloperEvaluation.sln
+```
+
+---
+
+## 🧩 Postman Collection
+
+The repository includes a **Postman Collection** to simplify API testing and validation.  
+You can import it directly into Postman using the file located in this repository:
+
+📁 [`sales_collection.json`](./postman/sales_collection.json)
+
+---
+
+## ✅ Summary
+
+This solution demonstrates:
+
+* A clean implementation of **DDD** principles with aggregate invariants.  
+* Structured in layers following the **Onion Architecture** principles
+* Asynchronous event handling using Rebus (In-Memory) and Serilog for logging domain events.
+* Effective caching and cache invalidation with **Redis**.  
+* Unit-tested domain logic ensuring consistency and reliability.
