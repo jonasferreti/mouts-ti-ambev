@@ -52,7 +52,7 @@ public class DeleteSaleItemHandlerTests
         var mockedSale = SaleTestData.GenerateValidSaleWithItems(2);
         var command = DeleteSaleItemHandlerTestData.GenerateValidCommand(mockedSale.Id, mockedSale.Items.First().Id);
 
-        _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>())
+        _saleRepository.GetByIdForUpdateAsync(command.SaleId, Arg.Any<CancellationToken>())
             .Returns(mockedSale);
 
         // ACT
@@ -85,7 +85,7 @@ public class DeleteSaleItemHandlerTests
         var mockedSale = SaleTestData.GenerateValidSaleWithItems(1);
         var command = DeleteSaleItemHandlerTestData.GenerateValidCommand(mockedSale.Id, mockedSale.Items.First().Id);
 
-        _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>())
+        _saleRepository.GetByIdForUpdateAsync(command.SaleId, Arg.Any<CancellationToken>())
             .Returns(mockedSale);
 
         // ACT
@@ -93,7 +93,7 @@ public class DeleteSaleItemHandlerTests
 
         // ASSERT
         // 1. Persistence Verification: Should DELETE, not UPDATE
-        await _saleRepository.Received(1).GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>());
+        await _saleRepository.Received(1).GetByIdForUpdateAsync(command.SaleId, Arg.Any<CancellationToken>());
         await _saleRepository.DidNotReceive().UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>());
         await _saleRepository.Received(1).DeleteAsync(mockedSale, Arg.Any<CancellationToken>());
 
@@ -133,12 +133,12 @@ public class DeleteSaleItemHandlerTests
         var command = DeleteSaleItemHandlerTestData.GenerateCommandWithNonExistentSale();
 
         // ACT
-        _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).ReturnsNull();
+        _saleRepository.GetByIdForUpdateAsync(command.SaleId, Arg.Any<CancellationToken>()).ReturnsNull();
 
         // ASSERT
         await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
 
-        await _saleRepository.Received(1).GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>());
+        await _saleRepository.Received(1).GetByIdForUpdateAsync(command.SaleId, Arg.Any<CancellationToken>());
 
         // Assert: Update, Delete, and Events should not occur
         await _saleRepository.DidNotReceiveWithAnyArgs().UpdateAsync(default!, default);
@@ -159,7 +159,7 @@ public class DeleteSaleItemHandlerTests
         // Create a Sale that DOES NOT contain the ItemId from the command
         var mockedSale = SaleTestData.GenerateValidSaleWithItems(1);
 
-        _saleRepository.GetByIdAsync(saleId).Returns(mockedSale);
+        _saleRepository.GetByIdForUpdateAsync(saleId).Returns(mockedSale);
 
         // ACT & ASSERT: Assumes the Sale.RemoveItem() method throws a DomainException (or similar) if the item is not found.
         await Assert.ThrowsAsync<DomainException>(() =>
