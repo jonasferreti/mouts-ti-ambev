@@ -48,6 +48,7 @@ public class BaseController : ControllerBase
         {
             Data = pagedList.Data,
             CurrentPage = pagedList.CurrentPage,
+            PageSize = pagedList.PageSize,
             TotalPages = pagedList.TotalPages,
             TotalCount = pagedList.TotalCount,
             Success = true
