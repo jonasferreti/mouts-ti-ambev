@@ -10,7 +10,7 @@
 /// <param name="TotalAmount">The final calculated amount of the sale.</param>
 public record SaleCreatedEvent(
     Guid SaleId, Guid CustomerId,
-    Guid BranchId, decimal TotalAmount)
+    Guid BranchId, decimal TotalAmount) : IDomainEvent
 {
     public DateTime DateOccurred { get; } = DateTime.UtcNow;
 }

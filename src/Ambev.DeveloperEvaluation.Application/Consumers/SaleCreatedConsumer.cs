@@ -1,4 +1,6 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Events;
+﻿using Ambev.DeveloperEvaluation.Application.Consumers.Cache;
+using Ambev.DeveloperEvaluation.Common.Cache;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Microsoft.Extensions.Logging;
 using Rebus.Handlers;
 
@@ -7,11 +9,12 @@ namespace Ambev.DeveloperEvaluation.Application.Consumers;
 /// <summary>
 /// Rebus message handler responsible for consuming the SaleCreatedEvent
 /// </summary>
-public class SaleCreatedConsumer : IHandleMessages<SaleCreatedEvent>
+public class SaleCreatedConsumer : SaleCacheInvalidatorConsumerBase<SaleCreatedEvent>
 {
     private readonly ILogger<SaleCreatedConsumer> _logger;
 
-    public SaleCreatedConsumer(ILogger<SaleCreatedConsumer> logger)
+    public SaleCreatedConsumer(ILogger<SaleCreatedConsumer> logger, ICacheManager cacheManager)
+        : base(cacheManager)
     {
         _logger = logger;
     }
@@ -21,7 +24,7 @@ public class SaleCreatedConsumer : IHandleMessages<SaleCreatedEvent>
     /// </summary>
     /// <param name="message">The SaleCreatedEvent record containing sale details.</param>
     /// <returns>A completed task, signaling Rebus that the message was processed successfully.</returns>
-    public Task Handle(SaleCreatedEvent message)
+    public override async Task Handle(SaleCreatedEvent message)
     {
         _logger.LogInformation(
             "EVENT: SaleId {SaleId} created for Customer " +
@@ -32,6 +35,6 @@ public class SaleCreatedConsumer : IHandleMessages<SaleCreatedEvent>
             message.TotalAmount
         );
 
-        return Task.CompletedTask;
+        await base.Handle(message);
     }
 }
