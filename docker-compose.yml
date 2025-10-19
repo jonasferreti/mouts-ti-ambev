@@ -10,11 +10,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTPS_PORTS=8081
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=ev@luAt10n
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
     ports:
       - "8081:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ~/.aspnet/https:/https:ro
 
   ambev.developerevaluation.database:
     container_name: ambev_developer_evaluation_database
@@ -27,7 +29,6 @@ services:
     ports:
       - "5432:5432"
     restart: unless-stopped
-
 
   ambev.developerevaluation.cache:
     container_name: ambev_developer_evaluation_cache 
