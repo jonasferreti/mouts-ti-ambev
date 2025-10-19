@@ -55,6 +55,7 @@ public class SaleRepository : ISaleRepository
         CancellationToken cancellationToken)
     {
         var query = _context.Sales
+            .AsNoTracking()
             .Include(s => s.Items)
             .AsQueryable();
 
