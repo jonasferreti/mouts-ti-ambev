@@ -11,10 +11,13 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionMiddleware> _logger;
         
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next, 
+            ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -41,7 +44,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             }
         }
 
-        private static Task HandleValidationExceptionAsync(HttpContext context, ValidationException exception)
+        private  Task HandleValidationExceptionAsync(HttpContext context, ValidationException exception)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -62,19 +65,19 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             return context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
         }
 
-        private static Task HandleDomainExceptionAsync(HttpContext context, Exception exception)
+        private  Task HandleDomainExceptionAsync(HttpContext context, Exception exception)
         {
             return HandleExceptionAsync(context, "BussinessLogicError",
                 exception, HttpStatusCode.BadRequest);
         }
 
-        private static Task HandleNotFoundExceptionAsync(HttpContext context, Exception exception)
+        private  Task HandleNotFoundExceptionAsync(HttpContext context, Exception exception)
         {
             return HandleExceptionAsync(context, "NotFoundError",
                 exception, HttpStatusCode.NotFound);
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, string message, 
+        private Task HandleExceptionAsync(HttpContext context, string message, 
             Exception ex, HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         {
             context.Response.ContentType = "application/json";
@@ -91,6 +94,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
+
+            _logger.LogError("Exception thrown : {Message} - {StackTrace}", ex.Message, ex.StackTrace);
 
             return context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
         }
