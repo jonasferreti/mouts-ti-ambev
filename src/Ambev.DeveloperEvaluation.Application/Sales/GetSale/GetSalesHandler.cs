@@ -68,10 +68,10 @@ public class GetSalesHandler : IRequestHandler<GetSalesQuery, PaginatedList<GetS
         if (!string.IsNullOrWhiteSpace(query.Criteria.CustomerName))
             cacheKey += $"_CustomerName:{query.Criteria.CustomerName}";
 
-        if (!string.IsNullOrWhiteSpace(query.Criteria.CustomerName))
+        if (!string.IsNullOrWhiteSpace(query.Criteria.BranchName))
             cacheKey += $"_BranchName:{query.Criteria.BranchName}";
 
-        if (!string.IsNullOrWhiteSpace(query.Criteria.CustomerName))
+        if (!string.IsNullOrWhiteSpace(query.Criteria.ProductName))
             cacheKey += $"_ProductName:{query.Criteria.ProductName}";
 
         if (query.Criteria.SortField is not null)
